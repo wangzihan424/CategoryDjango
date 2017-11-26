@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+
+{% block mycontent %}
+    <div id="myModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" style="color: red;">警告!!!</h4>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除该分类吗?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" id="ok_btn" class="btn btn-primary" data-dismiss="modal">确定</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <div id="myModal1" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button " class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" style="color: deepskyblue;">修改分类</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'cate_add' %}" method="POST">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="">分类名称</label>
+                            <input type="text" class="form-control" id="" placeholder="请输入分类名称" name="cate_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="">上级分类</label>
+                            <select name="cate_pid" id="" class="form-control">
+                                <option id="pid-0" value="0">顶级分类</option>
+                                {% for cate in categorys %}
+                                    <option id="pid-{{ cate.id }}" value="{{ cate.id }}">{{ cate.cate_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" id="update_ok_btn" class="btn btn-primary" data-dismiss="modal">确定</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <table class="table table-bordered table-striped table-hover text-center">
+        <tr>
+            <td>ID</td>
+            <td>分类名称</td>
+            <td>上级PID</td>
+            <td>PID操作</td>
+        </tr>
+        {% for cate in categorys %}
+            <tr id="{{ cate.id }}">
+                <td id="cate{{ cate.id }}-1">{{ forloop.counter }}</td>
+                <td id="cate{{ cate.id }}-2" class="text-left">{{ cate.cate_name }}</td>
+                <td id="cate{{ cate.id }}-3">{{ cate.cate_pid }}</td>
+                <td><button type="button" class="btn btn-danger btn-xs delete_btn" data-toggle="modal" data-target="#myModal" abc="{{ cate.id }}">删除</button>&nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-info btn-xs update_btn" data-toggle="modal"  abc="{{ cate.id }}" data-target="#myModal1">修改</button></td>
+            </tr>
+        {% endfor %}
+
+    </table>
+    <nav aria-label="Page navigation" class="text-center">
+        <ul class="pagination">
+            <li>
+                <a href="#" aria-label="Previous">
+                    <span aria-hidden="true">上一页</span>
+                </a>
+            </li>
+            <li><a href="#">1</a></li>
+            <li><a href="#">2</a></li>
+            <li><a href="#">3</a></li>
+            <li><a href="#">4</a></li>
+            <li><a href="#">5</a></li>
+            <li>
+                <a href="#" aria-label="Next">
+                    <span aria-hidden="true">下一页</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+{% endblock %}
+
+{% block myjs %}
+    <script>
+        $(function () {
+
+            var cate_id= 0
+            $("#ok_btn").click(function () {
+                $.ajax({
+                    url:"{% url 'cate_delete' %}",
+                    type:"POST",
+                    data:{
+                        id:cate_id,
+                        csrfmiddlewaretoken:"{{ csrf_token }}"
+                    },
+                    dataType:"JSON",
+                    success:function (data,status) {
+                        if (data.status == 1){
+
+                            $("#"+cate_id).remove()
+
+                        }else{
+                            alter(data.msg)
+                        }
+                    },
+                    error:function (a, b , c) {
+                        console.log(a)
+                        console.log(b)
+                        console.log(c)
+                    }
+                })
+            })
+
+            $(".delete_btn").click(function () {
+                {#            var id = $(this).parent().parent().attr("id")#}
+                var id = $(this).attr("abc")
+                cate_id = id
+            })
+            $("#update_ok_btn").click(function(){
+                cate_id = cate_id
+                $.ajax({
+                    url:"{%  url 'cate_update'%}",
+                    type:"POST",
+                    data:{
+                        id:cate_id,
+                        cate_name:$("[name='cate_name']").val(),
+                        cate_pid:$("[name='cate_pid']").val(),
+                        csrfmiddlewaretoken:"{{ csrf_token }}"
+
+                    },
+                    dataType:"JSON",
+                    success:function(data,status){
+                        if(data.status == 1){
+
+                            alert("更新成功")
+                            window.location.href = "{% url 'cate_select' %}"
+                        }else{
+                            alert("更新失败！！！")
+                        }
+
+                    },
+                    error:function (a,b,c) {
+
+
+                    }
+                })
+                alert("genggai")
+            })
+             $(".update_btn").click(function () {
+                var id = $(this).attr("abc")
+
+                var cate_ele_id ="cate"+id+"-2"
+                var cate_name =$("#"+cate_ele_id).html()
+
+                var cate_ele_pid ="cate"+id+"-3"
+                var cate_pid =$("#"+cate_ele_pid).html()
+                $("option").removeAttr("selected")
+                $("#pid-"+cate_pid).attr("selected","selected")
+                var split_result=cate_name.split("|--")
+                cate_name = split_result[split_result.length-1]
+                $("[name='cate_name']").val(cate_name)
+            })
+{#            $(".update_btn").click(function (){#}
+{#                var id = $(this).attr("abc")#}
+{#                var cate_ele_id = "cate"+id+'-2'#}
+{#                var cate_name = $("#"+cate_ele_id).html()#}
+{#                var split_result = cate_name.split("|--")#}
+{#                cate_name = split_result[split_result.length-1]#}
+{#                $("[name='cate_name']").val(cate_name)#}
+{#                alert(cate_name+"--"+id)#}
+{#                var cate_ele_id = "cate"+id+'-3'#}
+{#                var cate_pid = $("#"+cate_ele_id).html()#}
+{#                $("option").removeAttr("selected")#}
+{#                $("#pid-"+cate_id).attr("selected","selected")#}
+                    cate_name = split_result[split_result.length-1]
+{#            } )#}
+            })
+    </script>
+{% endblock %}

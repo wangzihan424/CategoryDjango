@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block mycss %}
+    <style>
+        .black {
+            color: blue;
+        }
+    </style>
+{% endblock %}
+
+{% block mycontent %}
+    <div class="jumbotron">
+        <h1 class="text-center">欢迎进入首页</h1>
+        <input class="form-control" id="phonenum" type="text" name="phone" placeholder="请输入你的手机号查询归属地">
+        <br>
+        <button class="btn btn-default" id="get_phone">GET查询</button>
+        <button class="btn btn-default" id="post_phone">POST查询</button>
+        <span id="phone_result"></span>
+        <span id="error" style="color: red;"></span>
+        <p><br><a id="learn_more" class="btn btn-primary btn-lg" role="button">更多精彩</a></p>
+    </div>
+{% endblock %}
+
+{% block myjs %}
+    <script type="text/javascript">
+        $(function () {
+            $("#get_phone").click(function () {
+                var num = $("#phonenum").val()
+                $.get("{% url 'phone' %}?phone="+num, function (data, status) {
+                    var result = data.data.city + data.data.province + data.data.isp
+                    $("#phone_result").html(result)
+                })
+            })
+            $("#post_phone").click(function () {
+                var num = $("#phonenum").val()
+                $.post("{% url 'phone' %}", {
+                    phone: num,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                }, function (data, status) {
+                    var result = data.data.city + data.data.province + data.data.isp
+                    $("#phone_result").html(result)
+                })
+            })
+
+            $('#phonenum').bind('input propertychange', function() {
+                var content = $(this).val()
+                var re = new RegExp("^[0-9]*$")
+                if (! re.test(content)) {
+                    $(this).val("")
+                    $("#error").html("输入有错误")
+                } else {
+                    $("#error").html("")
+                }
+
+                if (content.length == 11) {
+                    var re = new RegExp("^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(18[0,5-9]))\\d{8}$")
+                    if (re.test(content)) {
+                        var num = content
+                        $.get("{% url 'phone' %}?phone="+num, function (data, status) {
+                            var result = data.data.city + data.data.province + data.data.isp
+                            $("#phone_result").html(result)
+                        })
+                    } else {
+                        $("#error").html("输入的不是手机号")
+                    }
+                }
+            })
+        })
+    </script>
+{% endblock %}

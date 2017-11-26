@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block css %}
+{% endblock %}
+{% block mycontent %}
+    <table id="song_list" class="table table-bordered table-striped text-center ">
+
+    </table>
+{% endblock %}
+{% block myjs %}
+    <script type="text/javascript">
+        var xhr = new XMLHttpRequest()
+        xhr.onreadystatechange = function(){
+            if(xhr.readyState == 4 && xhr.status == 200) {
+                var result = xhr.responseText
+                var songs = JSON.parse(result)
+                {#                songs.song_list#}
+                {#                for (var song in songs.song_list){#}
+                {#                    console.log(song)#}
+                var table = document.getElementById("song_list")
+                var html = ""
+                html += "<tr>"
+                html += "<td>ID</td>"
+                html += "<td>歌曲名称</td>"
+                html += "<td>歌曲名称</td>"
+                html += "<td>作者名称</td>"
+                html += "<td>歌曲图片</td>"
+                html += "<td>歌曲链接</td>"
+                html += "</tr>"
+                for (var i = 0; i<songs.song_list.length;i++){
+                    var song = songs.song_list[i]
+                    html += "<tr>"
+                    html +="<td>"+(i+1)+"</td>"
+                    html +="<td>"+song.title+"</td>"
+                    html +="<td>"+song.author+"</td>"
+                    html +="<td><img src=\""+song.pic_big+"\" alt=\"图片名称\"></td>"
+                    html +="<td><a href=\"歌词地址\"></a></td>"
+                    html += "</tr>"
+                    table.innerHTML = html
+                    song.pic_big
+                    song.lrclink
+                    song.title
+                    song.author
+                }
+            }
+        }
+        xhr.open("get","{% url 'music' %}?type=1",false)
+        xhr.send()
+    </script>
+{% endblock %}

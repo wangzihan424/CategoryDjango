@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block mytitle %}
+    {{ title }}
+{% endblock %}
+
+{% block mycss %}
+{% endblock %}
+
+{% block mycontent %}
+    <form id="login" action="{% url 'login' %}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="">用户名</label>
+            <input name="user_name" type="text" class="form-control" id="" placeholder="请输入用户名">
+        </div>
+        <div class="form-group">
+            <label for="">密码</label>
+            <input name="user_psw" type="password" class="form-control" id="" placeholder="请输入密码">
+        </div>
+
+
+        <button type="submit" class="btn btn-default">登录</button>
+    </form>
+
+
+{% endblock %}
+
+{% block myjs %}
+    <script type="text/javascript">
+    $(function () {
+        $("#login").submit(function(e){
+           $.ajax({
+               url:"{% url 'login' %}",
+               type:"POST",
+               data:$('#login').serialize(),
+               dataType:"JSON",
+               success:function(data,status){
+                   alert(data.msg)
+               },
+               error:function () {
+               }
+           })
+            e.preventDefault()
+        })
+    })
+
+    </script>
+{% endblock %}
